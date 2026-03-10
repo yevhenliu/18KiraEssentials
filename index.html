@@ -5,40 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Album Player</title>
     <style>
-        body { font-family: sans-serif; background: #000; color: #fff; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; }
+        body { font-family: sans-serif; background: #0b0b0b; color: #eee; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; margin: 0; }
         
-        /* Album Cover Section */
-        .album-header { margin-bottom: 20px; text-align: center; }
-        .cover-art { width: 350px; height: 350px; background: #222; border-radius: 4px; object-fit: cover; border: 1px solid #333; }
+        .album-header { margin-bottom: 25px; text-align: center; }
+        .cover-art { width: 320px; height: 320px; background: #1a1a1a; border-radius: 4px; object-fit: cover; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
         
-        /* Player Controls */
-        .player-container { margin-bottom: 40px; width: 100%; max-width: 400px; text-align: center; }
-        #track-title { margin-bottom: 10px; font-weight: bold; color: #1DB954; min-height: 1.2em; }
-        audio { width: 100%; filter: invert(100%); }
+        .player-container { margin-bottom: 40px; width: 100%; max-width: 450px; background: #1a1a1a; padding: 20px; border-radius: 8px; border: 1px solid #222; }
+        #track-status { margin-bottom: 15px; font-size: 14px; color: #1DB954; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        audio { width: 100%; filter: invert(90%); }
 
-        /* Song Button Grid */
         .tracklist { 
             display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); 
-            gap: 12px; 
-            max-width: 700px; 
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); 
+            gap: 10px; 
+            max-width: 800px; 
             width: 100%; 
         }
         
         .song-btn { 
-            background: #1a1a1a; 
-            color: #ccc; 
+            background: #222; 
+            color: #888; 
             border: 1px solid #333; 
-            padding: 20px 5px; 
-            border-radius: 2px; 
+            padding: 18px 5px; 
+            border-radius: 3px; 
             cursor: pointer; 
-            transition: all 0.2s;
-            font-size: 13px;
-            text-transform: uppercase;
+            transition: 0.2s;
+            font-size: 12px;
+            font-weight: 600;
         }
         
-        .song-btn:hover { background: #333; color: #fff; border-color: #666; }
-        .song-btn.active { background: #1DB954; color: #000; border-color: #1DB954; font-weight: bold; }
+        .song-btn:hover { background: #333; color: #fff; }
+        .song-btn.active { background: #1DB954; color: #000; border-color: #1DB954; }
     </style>
 </head>
 <body>
@@ -48,9 +45,9 @@
     </div>
 
     <div class="player-container">
-        <div id="track-title">Select a track</div>
-        <audio id="main-player" controls>
-            <source id="audio-source" src="" type="audio/mpeg">
+        <div id="track-status">Select a Track</div>
+        <audio id="main-player" controls preload="auto">
+            Your browser does not support the audio element.
         </audio>
     </div>
 
@@ -59,11 +56,10 @@
 
     <script>
         const player = document.getElementById('main-player');
-        const source = document.getElementById('audio-source');
-        const titleDisplay = document.getElementById('track-title');
+        const statusDisplay = document.getElementById('track-status');
         const grid = document.getElementById('button-grid');
 
-        // This loop builds all 18 tracks using your specific naming
+        // Build the 18 buttons
         for (let i = 1; i <= 18; i++) {
             const trackName = `Track #${i}`;
             const fileName = `Track #${i}.mp3`;
@@ -73,21 +69,44 @@
             btn.innerText = trackName;
 
             btn.onclick = function() {
-                // Clear active style from other buttons
+                // 1. Highlight the current button
                 document.querySelectorAll('.song-btn').forEach(b => b.classList.remove('active'));
-                
-                // Set this button to active
                 btn.classList.add('active');
+
+                // 2. Format the URL to handle the '#' character correctly for web servers
+                // We replace '#' with '%23' and ' ' with '%20'
+                const encodedPath = fileName.replace(/#/g, '%23').replace(/ /g, '%20');
                 
-                // Update player and play
-                titleDisplay.innerText = `Playing: ${trackName}`;
-                source.src = fileName;
+                statusDisplay.innerText = "Loading: " + trackName;
+                
+                // 3. Reset and Load
+                player.pause();
+                player.src = encodedPath;
                 player.load();
-                player.play();
+
+                // 4. Play logic
+                const playPromise = player.play();
+
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        statusDisplay.innerText = "Playing: " + trackName;
+                    }).catch(error => {
+                        console.error("Playback error:", error);
+                        statusDisplay.innerText = "Error: File Not Found";
+                    });
+                }
             };
 
             grid.appendChild(btn);
         }
+
+        // Auto-play next track logic
+        player.onended = function() {
+            const currentActive = document.querySelector('.song-btn.active');
+            if (currentActive && currentActive.nextElementSibling) {
+                currentActive.nextElementSibling.click();
+            }
+        };
     </script>
 
 </body>
