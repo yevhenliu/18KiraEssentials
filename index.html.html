@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Album Player</title>
+    <style>
+        body { font-family: sans-serif; background: #000; color: #fff; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; }
+        
+        /* Album Cover Section */
+        .album-header { margin-bottom: 20px; text-align: center; }
+        .cover-art { width: 350px; height: 350px; background: #222; border-radius: 4px; object-fit: cover; border: 1px solid #333; }
+        
+        /* Player Controls */
+        .player-container { margin-bottom: 40px; width: 100%; max-width: 400px; text-align: center; }
+        #track-title { margin-bottom: 10px; font-weight: bold; color: #1DB954; min-height: 1.2em; }
+        audio { width: 100%; filter: invert(100%); }
+
+        /* Song Button Grid */
+        .tracklist { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); 
+            gap: 12px; 
+            max-width: 700px; 
+            width: 100%; 
+        }
+        
+        .song-btn { 
+            background: #1a1a1a; 
+            color: #ccc; 
+            border: 1px solid #333; 
+            padding: 20px 5px; 
+            border-radius: 2px; 
+            cursor: pointer; 
+            transition: all 0.2s;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+        
+        .song-btn:hover { background: #333; color: #fff; border-color: #666; }
+        .song-btn.active { background: #1DB954; color: #000; border-color: #1DB954; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="album-header">
+        <img src="cover.jpg" alt="Album Cover" class="cover-art">
+    </div>
+
+    <div class="player-container">
+        <div id="track-title">Select a track</div>
+        <audio id="main-player" controls>
+            <source id="audio-source" src="" type="audio/mpeg">
+        </audio>
+    </div>
+
+    <div class="tracklist" id="button-grid">
+        </div>
+
+    <script>
+        const player = document.getElementById('main-player');
+        const source = document.getElementById('audio-source');
+        const titleDisplay = document.getElementById('track-title');
+        const grid = document.getElementById('button-grid');
+
+        // This loop builds all 18 tracks using your specific naming
+        for (let i = 1; i <= 18; i++) {
+            const trackName = `Track #${i}`;
+            const fileName = `Track #${i}.mp3`;
+
+            const btn = document.createElement('button');
+            btn.className = 'song-btn';
+            btn.innerText = trackName;
+
+            btn.onclick = function() {
+                // Clear active style from other buttons
+                document.querySelectorAll('.song-btn').forEach(b => b.classList.remove('active'));
+                
+                // Set this button to active
+                btn.classList.add('active');
+                
+                // Update player and play
+                titleDisplay.innerText = `Playing: ${trackName}`;
+                source.src = fileName;
+                player.load();
+                player.play();
+            };
+
+            grid.appendChild(btn);
+        }
+    </script>
+
+</body>
+</html>
